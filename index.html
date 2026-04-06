@@ -33,7 +33,8 @@
       color: var(--black);
       background: var(--white);
       -webkit-font-smoothing: antialiased;
-      min-height: 100%;
+      height: 100%;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -161,6 +162,7 @@
     .preview-inner {
       width: 100%;
       height: 100%;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -788,6 +790,7 @@
     }
 
     @media (max-width: 860px) {
+      body { height: auto; overflow: visible; }
       .app { flex-direction: column; height: auto; overflow: visible; }
       .preview {
         position: relative;
