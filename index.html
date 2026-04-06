@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gate Studio — Build &amp; Price Your Gate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #FFB910;
+      --accent-hover: #E5A000;
+      --black: #1d1d1f;
+      --white: #ffffff;
+      --gray-dark: #424245;
+      --gray-mid: #6e6e73;
+      --gray-light: #f5f5f7;
+      --radius-card: 20px;
+      --radius-pill: 980px;
+      --nav-height: 56px;
+      --breadcrumb-height: 44px;
+      --max-width: 1440px;
+      --transition: 0.3s cubic-bezier(.25,.1,.25,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { height: 100%; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--black);
+      background: var(--white);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      height: var(--nav-height);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-inner {
+      max-width: var(--max-width);
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--black);
+    }
+    .nav-brand-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px; color: var(--black);
+    }
+    .nav-brand-text { font-size: 17px; letter-spacing: -0.5px; }
+    .nav-brand-text span:first-child { font-weight: 700; }
+    .nav-brand-text span:last-child { font-weight: 300; color: var(--gray-mid); }
+    .nav-links {
+      display: flex; align-items: center; gap: 28px; list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none; color: var(--gray-dark);
+      font-size: 13px; font-weight: 500;
+      transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--black); }
+
+    /* ── Breadcrumb Bar ── */
+    .breadcrumb-bar {
+      height: var(--breadcrumb-height);
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      position: sticky;
+      top: var(--nav-height);
+      z-index: 90;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .breadcrumb-bar::-webkit-scrollbar { display: none; }
+    .breadcrumb-inner {
+      max-width: var(--max-width);
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .breadcrumb-inner::-webkit-scrollbar { display: none; }
+    .crumb-item {
+      font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+      letter-spacing: -0.1px;
+      cursor: default;
+      padding: 4px 0;
+      transition: color var(--transition);
+      flex-shrink: 0;
+    }
+    .crumb-item.has-value {
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+    }
+    .crumb-item.has-value:hover {
+      color: var(--white);
+    }
+    .crumb-item.active-step {
+      color: var(--accent); font-weight: 600;
+    }
+    .crumb-sep {
+      color: rgba(255,255,255,0.2);
+      font-size: 10px;
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── App Shell ── */
+    .app {
+      flex: 1;
+      display: flex;
+      min-height: 600px;
+    }
+
+    /* ── Left: Preview ── */
+    .preview {
+      flex: 1;
+      background: var(--gray-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: sticky;
+      top: calc(var(--nav-height) + var(--breadcrumb-height));
+      height: calc(100vh - var(--nav-height) - var(--breadcrumb-height));
+      min-width: 0;
+    }
+    .preview-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #e8e8ed 0%, #d2d2d7 60%, #c4c4c9 100%);
+      position: relative;
+    }
+    .preview-inner svg.placeholder-gate {
+      width: 45%;
+      max-width: 360px;
+      opacity: 0.1;
+    }
+    .preview-badge {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      background: rgba(29,29,31,0.75);
+      backdrop-filter: blur(12px);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: var(--radius-pill);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all var(--transition);
+    }
+    .preview-badge.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .preview-desc {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(29,29,31,0.5);
+      backdrop-filter: blur(12px);
+      color: rgba(255,255,255,0.8);
+      font-size: 11px;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      max-width: 260px;
+      text-align: right;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .preview-desc.visible { opacity: 1; }
+
+    /* ── Right: Panel ── */
+    .panel {
+      width: 480px;
+      flex-shrink: 0;
+      border-left: 1px solid rgba(0,0,0,0.06);
+      background: var(--white);
+      padding-bottom: 80px;
+    }
+
+    /* Step progress */
+    .step-progress {
+      display: flex;
+      gap: 6px;
+      padding: 20px 28px 0;
+      position: sticky;
+      top: calc(var(--nav-height) + var(--breadcrumb-height));
+      background: var(--white);
+      z-index: 5;
+      padding-bottom: 12px;
+    }
+    .step-dot {
+      flex: 1; height: 3px;
+      border-radius: 1.5px;
+      background: rgba(0,0,0,0.07);
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+    .step-dot.active { background: var(--accent); }
+    .step-dot.completed { background: var(--black); }
+
+    /* Step content area */
+    .step-content {
+      padding: 16px 28px 32px;
+    }
+
+    /* Step panels */
+    .step-panel { display: none; }
+    .step-panel.active {
+      display: block;
+      animation: panelIn 0.25s ease;
+    }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateX(12px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .step-number {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .step-panel h2 {
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -1px; line-height: 1.2;
+    }
+    .step-panel .step-desc {
+      font-size: 13px; color: var(--gray-mid);
+      margin-top: 4px; line-height: 1.4;
+    }
+
+    /* ── Type icon row ── */
+    .type-icon-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .type-icon-btn {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      padding: 14px 6px 12px;
+      background: var(--gray-light);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .type-icon-btn:hover { background: #ebebed; }
+    .type-icon-btn.selected {
+      border-color: var(--accent);
+      background: rgba(255,185,16,0.08);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .type-icon-btn svg {
+      width: 26px; height: 26px;
+      color: var(--gray-dark);
+      transition: color var(--transition);
+    }
+    .type-icon-btn.selected svg { color: var(--black); }
+    .type-icon-btn span {
+      font-size: 11px; font-weight: 600;
+      color: var(--gray-mid);
+      transition: color var(--transition);
+    }
+    .type-icon-btn.selected span { color: var(--black); }
+
+    /* ── Size chips ── */
+    .size-section { margin-top: 20px; }
+    .size-section-label {
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 8px; color: var(--black);
+    }
+    .size-chips {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .size-chip {
+      padding: 8px 16px;
+      background: var(--gray-light);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      color: var(--black);
+    }
+    .size-chip:hover { background: #ebebed; }
+    .size-chip.selected {
+      border-color: var(--accent);
+      background: rgba(255,185,16,0.08);
+    }
+
+    .size-chip--wide { padding-left: 14px; padding-right: 14px; }
+
+    /* Direction chips with pattern icons */
+    .dir-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 14px 8px;
+    }
+    .dir-chip > svg {
+      width: 30px; height: 20px;
+      stroke: currentColor; fill: none;
+      opacity: 0.55;
+      flex-shrink: 0;
+    }
+    .dir-chip.selected > svg { opacity: 1; }
+
+    /* ── Infill sub-options ── */
+    .infill-sub-divider {
+      margin: 28px 0 24px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+
+    /* ── Four-col grid (frame shapes) ── */
+    .option-grid.four-col { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 860px) { .option-grid.four-col { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 480px) { .option-grid.four-col { grid-template-columns: repeat(2, 1fr); } }
+
+    /* ── Disabled option cards ── */
+    .option-card.disabled {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+    .option-card.disabled .check-badge { display: none; }
+
+    /* ── Bracing availability tag ── */
+    .size-section-hint {
+      font-size: 12px;
+      color: var(--gray-mid);
+      margin-top: -4px;
+      margin-bottom: 12px;
+      min-height: 16px;
+    }
+    .brace-tag {
+      position: absolute;
+      top: 6px; right: 6px;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.3px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .brace-tag.required {
+      background: rgba(255,59,48,0.12);
+      color: #d32f2f;
+    }
+    .brace-tag.upgrade {
+      background: rgba(255,185,16,0.15);
+      color: #a07000;
+    }
+    .brace-tag.active-size {
+      background: rgba(52,199,89,0.15);
+      color: #1a7d34;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-box {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform:scale(0.94) translateY(8px); }
+      to   { opacity:1; transform:scale(1) translateY(0); }
+    }
+    .modal-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(255,59,48,0.1);
+      color: #d32f2f;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .modal-box h3 {
+      font-size: 17px; font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 10px;
+    }
+    .modal-box p {
+      font-size: 14px; color: var(--gray-mid);
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .modal-btn--secondary {
+      background: var(--gray-light);
+      color: var(--black);
+    }
+    .modal-btn--secondary:hover { background: #e0e0e5; }
+    .modal-btn--primary {
+      background: var(--accent);
+      color: var(--black);
+    }
+    .modal-btn--primary:hover { background: var(--accent-hover); }
+
+    /* ── Contact Modal ── */
+    .contact-modal-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(255,185,16,0.12);
+      color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .contact-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .contact-field-label {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--gray-mid); margin-bottom: 4px;
+    }
+    .contact-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e0e0e5;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--black);
+      background: var(--white);
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .contact-input:focus { border-color: var(--accent); }
+    .contact-input.error { border-color: #d32f2f; }
+    textarea.contact-input { resize: vertical; min-height: 72px; line-height: 1.45; }
+    .contact-or-divider {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 11px; font-weight: 600; color: var(--gray-mid);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin: 2px 0;
+    }
+    .contact-or-divider::before, .contact-or-divider::after {
+      content: ''; flex: 1; height: 1px; background: #e0e0e5;
+    }
+    .contact-error-msg {
+      font-size: 12px; color: #d32f2f;
+      margin-top: -6px; margin-bottom: 4px;
+      display: none;
+    }
+    .contact-error-msg.visible { display: block; }
+    .contact-skip {
+      text-align: center; margin-top: 14px;
+    }
+    .contact-skip button {
+      background: none; border: none; cursor: pointer;
+      font-size: 12px; color: var(--gray-mid);
+      font-family: inherit; text-decoration: underline;
+      padding: 0;
+    }
+    .contact-skip button:hover { color: var(--black); }
+
+    .vinyl-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .vinyl-swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Option grid (finish / infill) ── */
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .option-grid.three-col {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .option-card {
+      background: var(--gray-light);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      overflow: hidden;
+      text-align: left;
+      position: relative;
+    }
+    .option-card:hover {
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+    .option-card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 2px 12px rgba(255,185,16,0.12);
+    }
+    .option-card .check-badge {
+      position: absolute; top: 6px; right: 6px;
+      width: 20px; height: 20px;
+      background: var(--accent); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transform: scale(0.5);
+      transition: opacity var(--transition), transform var(--transition);
+    }
+    .option-card.selected .check-badge {
+      opacity: 1; transform: scale(1);
+    }
+    .option-card .check-badge svg { width: 12px; height: 12px; }
+    .option-card-image {
+      width: 100%;
+      height: 48px;
+      background: linear-gradient(135deg, #e0e0e5 0%, #c8c8cd 100%);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .option-card-image svg { width: 100%; height: 100%; padding: 6px; opacity: 0.45; }
+    .option-card-body { padding: 10px 12px; }
+    .option-card-body h4 {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: -0.2px; margin-bottom: 1px;
+    }
+    .option-card-body p {
+      font-size: 10px; color: var(--gray-mid); line-height: 1.3;
+    }
+
+    /* ── Addons ── */
+    .addon-package {
+      background: linear-gradient(135deg, rgba(255,185,16,0.1), rgba(255,185,16,0.03));
+      border: 2px solid rgba(255,185,16,0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 18px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .addon-package:hover { border-color: var(--accent); }
+    .addon-package.selected {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(255,185,16,0.15), rgba(255,185,16,0.05));
+    }
+    .addon-package-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 4px;
+    }
+    .addon-package-header h4 { font-size: 14px; font-weight: 700; }
+    .addon-package-badge {
+      background: var(--accent); color: var(--black);
+      font-size: 9px; font-weight: 700;
+      padding: 3px 8px; border-radius: var(--radius-pill);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .addon-package p { font-size: 12px; color: var(--gray-mid); line-height: 1.4; }
+
+    .addon-divider-label {
+      font-size: 12px; font-weight: 600;
+      color: var(--gray-mid);
+      margin-top: 16px; margin-bottom: 8px;
+    }
+
+    .addon-list { display: flex; flex-direction: column; gap: 6px; }
+    .addon-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+      background: var(--gray-light);
+      border-radius: 12px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all var(--transition);
+    }
+    .addon-item:hover { background: #ebebed; }
+    .addon-item.selected {
+      border-color: var(--accent);
+      background: rgba(255,185,16,0.05);
+    }
+    .addon-item-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, #e0e0e5, #c8c8cd);
+      border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .addon-item-icon svg { width: 20px; height: 20px; opacity: 0.2; }
+    .addon-item-info { flex: 1; }
+    .addon-item-info h4 { font-size: 13px; font-weight: 600; }
+    .addon-item-info p { font-size: 11px; color: var(--gray-mid); margin-top: 1px; }
+    .addon-toggle {
+      width: 40px; height: 24px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 12px;
+      position: relative; flex-shrink: 0;
+      transition: background var(--transition);
+    }
+    .addon-item.selected .addon-toggle { background: var(--accent); }
+    .addon-toggle::after {
+      content: ''; position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: white; border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      transition: transform var(--transition);
+    }
+    .addon-item.selected .addon-toggle::after {
+      transform: translateX(16px);
+    }
+
+    /* ── Step footer (fixed bottom) ── */
+    .step-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 80;
+      padding: 14px 32px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* ── Price badge in footer ── */
+    .price-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      padding: 6px 14px;
+      border-radius: 10px;
+      transition: background var(--transition);
+      user-select: none;
+    }
+    .price-badge:hover { background: var(--gray-light); }
+    .price-badge-label {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--gray-mid);
+    }
+    .price-badge-value {
+      font-size: 18px; font-weight: 700;
+      color: var(--black); letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .price-badge-hint {
+      font-size: 10px; color: var(--gray-mid);
+    }
+
+    /* ── Price breakdown popup ── */
+    .price-breakdown-popup {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      padding: 20px 22px;
+      min-width: 280px;
+      max-width: 360px;
+      width: calc(100vw - 48px);
+      animation: modalIn 0.18s ease;
+      display: none;
+    }
+    .price-breakdown-popup.open { display: block; }
+    .price-breakdown-title {
+      font-size: 13px; font-weight: 700;
+      margin-bottom: 14px; letter-spacing: -0.2px;
+    }
+    .price-breakdown-row {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: var(--gray-dark);
+      padding: 5px 0;
+      border-bottom: 1px solid #f0f0f2;
+    }
+    .price-breakdown-row:last-child { border-bottom: none; }
+    .price-breakdown-row.total {
+      font-weight: 700; font-size: 14px;
+      color: var(--black); margin-top: 6px;
+      padding-top: 10px;
+      border-top: 2px solid var(--black);
+      border-bottom: none;
+    }
+    .price-breakdown-row.cost { color: var(--gray-mid); font-size: 11px; }
+    .price-breakdown-note {
+      font-size: 10px; color: var(--gray-mid);
+      margin-top: 10px; line-height: 1.5;
+    }
+    .price-breakdown-incomplete {
+      font-size: 12px; color: var(--gray-mid);
+      text-align: center; padding: 8px 0;
+    }
+    .btn-back {
+      background: none; border: none;
+      color: var(--gray-mid); font-size: 13px; font-weight: 500;
+      cursor: pointer; padding: 10px 0;
+      display: flex; align-items: center; gap: 5px;
+      transition: color var(--transition);
+    }
+    .btn-back:hover { color: var(--black); }
+    .btn-back:disabled { opacity: 0; pointer-events: none; }
+    .btn-back svg { width: 14px; height: 14px; }
+    .btn-primary {
+      background: var(--accent); color: var(--black);
+      font-size: 13px; font-weight: 600;
+      padding: 11px 28px;
+      border-radius: var(--radius-pill);
+      border: none; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    /* ── Mobile ── */
+    .nav-toggle {
+      display: none; background: none; border: none;
+      cursor: pointer; padding: 6px;
+    }
+    .nav-toggle span {
+      display: block; width: 18px; height: 2px;
+      background: var(--black); margin: 3px 0; border-radius: 1px;
+    }
+
+    @media (max-width: 860px) {
+      .app { flex-direction: column; }
+      .preview {
+        position: relative;
+        top: 0;
+        height: 40vh; min-height: 240px;
+        flex: none;
+      }
+      .panel {
+        width: 100%;
+        border-left: none; border-top: 1px solid rgba(0,0,0,0.06);
+        padding-bottom: 80px;
+      }
+      .step-progress {
+        top: calc(var(--nav-height) + var(--breadcrumb-height));
+      }
+      .nav-links { display: none; }
+      .nav-toggle { display: block; }
+      .breadcrumb-bar { padding: 0 20px; }
+      .step-content { padding: 20px 20px 32px; }
+      .step-footer { padding: 14px 20px; }
+      .option-grid.three-col { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      .preview { height: 32vh; min-height: 180px; }
+      .option-grid, .option-grid.three-col { grid-template-columns: 1fr 1fr; }
+      .type-icon-row { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <div class="nav-brand-icon">G</div>
+      <div class="nav-brand-text"><span>gate</span><span>studio</span></div>
+    </a>
+    <button class="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="#">Build &amp; Price</a></li>
+      <li><a href="#">Gallery</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#" class="btn-primary" style="padding:9px 22px;">Get a Quote</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <div class="breadcrumb-inner" id="breadcrumbs">
+    <span class="crumb-pending">Configure your gate to get started</span>
+  </div>
+</div>
+
+<!-- App Shell -->
+<div class="app">
+
+  <!-- Left: Preview -->
+  <div class="preview">
+    <div class="preview-inner">
+      <svg class="placeholder-gate" viewBox="0 0 120 80" fill="none" stroke="currentColor" stroke-width="0.8">
+        <rect x="5" y="10" width="110" height="60" rx="3"/>
+        <line x1="5" y1="25" x2="115" y2="25"/>
+        <line x1="5" y1="40" x2="115" y2="40"/>
+        <line x1="5" y1="55" x2="115" y2="55"/>
+        <line x1="30" y1="10" x2="30" y2="70"/>
+        <line x1="60" y1="10" x2="60" y2="70"/>
+        <line x1="90" y1="10" x2="90" y2="70"/>
+      </svg>
+      <div class="preview-badge" id="previewBadge"></div>
+      <div class="preview-desc" id="previewDesc"></div>
+    </div>
+  </div>
+
+  <!-- Right: Panel -->
+  <div class="panel">
+    <div class="step-progress">
+      <div class="step-dot active" data-step="1"></div>
+      <div class="step-dot" data-step="2"></div>
+      <div class="step-dot" data-step="3"></div>
+      <div class="step-dot" data-step="4"></div>
+      <div class="step-dot" data-step="5"></div>
+      <div class="step-dot" data-step="6"></div>
+    </div>
+
+    <div class="step-content">
+
+      <!-- STEP 1 -->
+      <div class="step-panel active" data-step="1">
+        <div class="step-number">Step 1</div>
+        <h2>Choose your gate type</h2>
+        <p class="step-desc">Select the operation style that fits your site.</p>
+        <div class="type-icon-row">
+          <button class="type-icon-btn" data-value="slide" onclick="selectGateType(this)">
+            <!-- Slide gate: panel with pickets on a ground track, arrow shows slide direction -->
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Gate panel frame -->
+              <rect x="3" y="4" width="18" height="20" rx="1"/>
+              <!-- Vertical pickets inside panel -->
+              <line x1="7.5" y1="4" x2="7.5" y2="24"/>
+              <line x1="12" y1="4" x2="12" y2="24"/>
+              <line x1="16.5" y1="4" x2="16.5" y2="24"/>
+              <!-- Ground track -->
+              <line x1="2" y1="27" x2="30" y2="27"/>
+              <!-- Wheels/rollers on track -->
+              <circle cx="8" cy="27" r="1.5" fill="currentColor" stroke="none"/>
+              <circle cx="17" cy="27" r="1.5" fill="currentColor" stroke="none"/>
+              <!-- Slide direction arrow (pointing right →) -->
+              <line x1="23" y1="14" x2="29" y2="14"/>
+              <polyline points="26,11 29,14 26,17"/>
+            </svg>
+            <span>Slide</span>
+          </button>
+          <button class="type-icon-btn" data-value="swing" onclick="selectGateType(this)">
+            <!-- Swing gate: top-down plan view — wall + hinge + gate arm at angle + quarter-arc sweep -->
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Wall / fence (plan view, horizontal line at top) -->
+              <line x1="1" y1="8" x2="31" y2="8" stroke-width="2"/>
+              <!-- Hinge post (circle in plan view = pivot point) -->
+              <circle cx="6" cy="8" r="2.5" fill="currentColor" stroke="none"/>
+              <!-- Gate panel arm (shown ~55° open from wall) -->
+              <line x1="6" y1="8" x2="18" y2="25" stroke-width="2.2" stroke-linecap="round"/>
+              <!-- Free end cap -->
+              <circle cx="18" cy="25" r="1.5" fill="currentColor" stroke="none"/>
+              <!-- Closed position reference (dashed, along wall) -->
+              <line x1="6" y1="8" x2="24" y2="8" stroke-dasharray="2.5 2" stroke-width="1.2"/>
+              <!-- Swing arc: quarter-circle centered at hinge (6,8), r=18 -->
+              <!-- from 0° (24,8) to 90° (6,26) -->
+              <path d="M 24 8 A 18 18 0 0 1 6 26" stroke-dasharray="3 2" stroke-width="1.2"/>
+              <!-- Arrowhead at arc end -->
+              <polyline points="3,23 6,27 9,23" stroke-width="1.2" fill="none"/>
+            </svg>
+            <span>Swing</span>
+          </button>
+          <button class="type-icon-btn" data-value="fold" onclick="selectGateType(this)">
+            <!-- Bi-fold gate: top-down plan view showing two panels folding into a V -->
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Left post -->
+              <rect x="1" y="4" width="3.5" height="24" rx="1"/>
+              <!-- Right post -->
+              <rect x="27.5" y="4" width="3.5" height="24" rx="1"/>
+              <!-- Left gate panel (angled — shown from top, folding inward) -->
+              <line x1="4.5" y1="7" x2="16" y2="16"/>
+              <line x1="4.5" y1="25" x2="16" y2="16"/>
+              <!-- Right gate panel (mirrored) -->
+              <line x1="27.5" y1="7" x2="16" y2="16"/>
+              <line x1="27.5" y1="25" x2="16" y2="16"/>
+              <!-- Fold joint at center -->
+              <circle cx="16" cy="16" r="2" fill="currentColor" stroke="none"/>
+              <!-- Hinge dots at posts -->
+              <circle cx="4.5" cy="7" r="1.2" fill="currentColor" stroke="none"/>
+              <circle cx="4.5" cy="25" r="1.2" fill="currentColor" stroke="none"/>
+              <circle cx="27.5" cy="7" r="1.2" fill="currentColor" stroke="none"/>
+              <circle cx="27.5" cy="25" r="1.2" fill="currentColor" stroke="none"/>
+            </svg>
+            <span>Bi-Fold</span>
+          </button>
+          <button class="type-icon-btn" data-value="barrier" onclick="selectGateType(this)">
+            <!-- Triangle-frame barrier: control box + arm made of two rails converging to a point -->
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Control cabinet -->
+              <rect x="1" y="16" width="8" height="12" rx="1.5"/>
+              <!-- Indicator light on cabinet -->
+              <circle cx="5" cy="19.5" r="1.2" fill="currentColor" stroke="none"/>
+              <!-- Pivot point -->
+              <circle cx="9" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+              <!-- Triangle frame arm: top rail, bottom rail, converging to a point at far right -->
+              <line x1="9" y1="13" x2="30" y2="16"/>
+              <line x1="9" y1="19" x2="30" y2="16"/>
+              <!-- Arm tip dot -->
+              <circle cx="30" cy="16" r="1.2" fill="currentColor" stroke="none"/>
+              <!-- Internal diagonal braces -->
+              <line x1="16" y1="14" x2="20" y2="18"/>
+              <line x1="22" y1="14.8" x2="25" y2="17.2"/>
+            </svg>
+            <span>Barrier</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-panel" data-step="2">
+        <div class="step-number">Step 2</div>
+        <h2>Select your size</h2>
+        <p class="step-desc">Choose gate height and opening width.</p>
+
+        <!-- Swing type selector — only visible when gate type is swing -->
+        <div class="size-section" id="swingTypeSection" style="display:none">
+          <div class="size-section-label">Swing Type</div>
+          <div class="size-chips" data-group="swingType" id="swingTypeChips">
+            <div class="size-chip" data-value="single">Single</div>
+            <div class="size-chip" data-value="double">Double</div>
+          </div>
+        </div>
+
+        <!-- Fold type selector — only visible when gate type is fold -->
+        <div class="size-section" id="foldTypeSection" style="display:none">
+          <div class="size-section-label">Fold Type</div>
+          <div class="size-chips" data-group="foldType" id="foldTypeChips">
+            <div class="size-chip" data-value="single">Single</div>
+            <div class="size-chip" data-value="double">Double</div>
+          </div>
+        </div>
+
+        <div class="size-section">
+          <div class="size-section-label">Height</div>
+          <div class="size-chips" data-group="height">
+            <div class="size-chip" data-value="4">4 ft</div>
+            <div class="size-chip" data-value="6">6 ft</div>
+            <div class="size-chip" data-value="8" id="height8chip">8 ft</div>
+          </div>
+        </div>
+        <div class="size-section">
+          <div class="size-section-label">Opening Width</div>
+          <div class="size-chips" data-group="width" id="widthChips"></div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Frame -->
+      <div class="step-panel" data-step="3">
+        <div class="step-number">Step 3</div>
+        <h2>Frame design</h2>
+        <p class="step-desc">Choose the frame shape and internal bracing structure.</p>
+
+        <div class="size-section">
+          <div class="size-section-label">Frame Shape</div>
+          <div class="option-grid four-col" id="frameShapeGrid">
+
+            <div class="option-card" data-group="frameShape" data-value="rectangle">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="36" height="24" rx="1"/></svg></div>
+              <div class="option-card-body"><h4>Rectangle</h4></div>
+            </div>
+
+            <div class="option-card" data-group="frameShape" data-value="arch">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 26 L2 14 Q20 1 38 14 L38 26 Z"/></svg></div>
+              <div class="option-card-body"><h4>Arch</h4></div>
+            </div>
+
+            <div class="option-card" data-group="frameShape" data-value="reverse-arch">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2 L2 14 Q20 27 38 14 L38 2 Z"/></svg></div>
+              <div class="option-card-body"><h4>Reverse Arch</h4></div>
+            </div>
+
+            <div class="option-card" data-group="frameShape" data-value="bell-curve">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2 L2 12 Q8 27 20 27 Q32 27 38 12 L38 2 Z"/></svg></div>
+              <div class="option-card-body"><h4>Bell Curve</h4></div>
+            </div>
+
+            <div class="option-card" data-group="frameShape" data-value="peak">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 26 L2 10 L20 2 L38 10 L38 26 Z"/></svg></div>
+              <div class="option-card-body"><h4>Peak</h4></div>
+            </div>
+
+            <div class="option-card" data-group="frameShape" data-value="slant">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 26 L2 6 L38 2 L38 26 Z"/></svg></div>
+              <div class="option-card-body"><h4>Slant</h4></div>
+            </div>
+
+            <div class="option-card" data-group="frameShape" data-value="custom">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 2"><path d="M2 26 L2 8 Q10 2 20 4 Q30 6 38 2 L38 26 Z"/></svg></div>
+              <div class="option-card-body"><h4>Custom</h4></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="size-section" style="margin-top:28px">
+          <div class="size-section-label">Internal Bracing</div>
+          <div class="size-section-hint" id="bracingHint"></div>
+          <div class="option-grid three-col" id="bracingGrid">
+
+            <div class="option-card brace-card" data-group="bracing" data-value="cable-diagonal">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-linecap="round">
+                <rect x="2" y="2" width="36" height="24" rx="1" stroke-width="1.5"/>
+                <line x1="2" y1="2" x2="38" y2="26" stroke-width="1.5" stroke-dasharray="3 2"/>
+              </svg></div>
+              <div class="option-card-body"><h4>Cable Diagonal</h4><p>Up to 16 ft</p></div>
+              <div class="brace-tag" id="tag-cable-diagonal"></div>
+            </div>
+
+            <div class="option-card brace-card" data-group="bracing" data-value="cable-double-x">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-linecap="round">
+                <rect x="2" y="2" width="36" height="24" rx="1" stroke-width="1.5"/>
+                <line x1="2" y1="2" x2="38" y2="26" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <line x1="38" y1="2" x2="2" y2="26" stroke-width="1.5" stroke-dasharray="3 2"/>
+              </svg></div>
+              <div class="option-card-body"><h4>Double X Cable</h4><p>Up to 20 ft</p></div>
+              <div class="brace-tag" id="tag-cable-double-x"></div>
+            </div>
+
+            <div class="option-card brace-card" data-group="bracing" data-value="rigid-diagonal">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-linecap="round">
+                <rect x="2" y="2" width="36" height="24" rx="1" stroke-width="1.5"/>
+                <line x1="2" y1="2" x2="38" y2="26" stroke-width="3"/>
+              </svg></div>
+              <div class="option-card-body"><h4>Rigid Diagonal</h4><p>All sizes</p></div>
+              <div class="brace-tag" id="tag-rigid-diagonal"></div>
+            </div>
+
+            <div class="option-card brace-card" data-group="bracing" data-value="rigid-x">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-linecap="round">
+                <rect x="2" y="2" width="36" height="24" rx="1" stroke-width="1.5"/>
+                <line x1="2" y1="2" x2="38" y2="26" stroke-width="2.5"/>
+                <line x1="38" y1="2" x2="2" y2="26" stroke-width="2.5"/>
+              </svg></div>
+              <div class="option-card-body"><h4>Rigid X Brace</h4><p>All sizes — added stability</p></div>
+              <div class="brace-tag" id="tag-rigid-x"></div>
+            </div>
+
+            <div class="option-card brace-card" data-group="bracing" data-value="bottom-beam">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-linecap="round">
+                <rect x="2" y="2" width="36" height="24" rx="1" stroke-width="1.5"/>
+                <rect x="2" y="21" width="36" height="5" rx="0.5" fill="currentColor" fill-opacity="0.2" stroke-width="1.5"/>
+              </svg></div>
+              <div class="option-card-body"><h4>Bottom Beam</h4><p>All sizes</p></div>
+              <div class="brace-tag" id="tag-bottom-beam"></div>
+            </div>
+
+            <div class="option-card brace-card" data-group="bracing" data-value="center-beam">
+              <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="option-card-image"><svg viewBox="0 0 40 28" fill="none" stroke="currentColor" stroke-linecap="round">
+                <rect x="2" y="2" width="36" height="24" rx="1" stroke-width="1.5"/>
+                <rect x="2" y="12" width="36" height="4" rx="0.5" fill="currentColor" fill-opacity="0.2" stroke-width="1.5"/>
+              </svg></div>
+              <div class="option-card-body"><h4>Center Beam</h4><p>All sizes</p></div>
+              <div class="brace-tag" id="tag-center-beam"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-panel" data-step="4">
+        <div class="step-number">Step 4</div>
+        <h2>Pick your finish</h2>
+        <p class="step-desc">Select material and finish for durability and appearance.</p>
+        <div class="option-grid three-col">
+          <div class="option-card" data-group="finish" data-value="galvanized">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#c0c0c0,#a8a8a8)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </div>
+            <div class="option-card-body"><h4>Galvanized Steel</h4><p>Hot-dip zinc coated</p></div>
+          </div>
+          <div class="option-card" data-group="finish" data-value="powder-black">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#3a3a3a,#1d1d1f)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </div>
+            <div class="option-card-body"><h4>Powder Coat — Black</h4><p>Steel, black powder coated</p></div>
+          </div>
+          <div class="option-card" data-group="finish" data-value="powder-custom">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#e8d5b7,#c4a882)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
+            </div>
+            <div class="option-card-body"><h4>Powder Coat — Custom</h4><p>Any RAL color</p></div>
+          </div>
+          <div class="option-card" data-group="finish" data-value="aluminum">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#d8d8d8,#e8e8e8)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </div>
+            <div class="option-card-body"><h4>Raw Aluminum</h4><p>Lightweight, corrosion resistant</p></div>
+          </div>
+          <div class="option-card" data-group="finish" data-value="stainless">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#e0e0e0,#cacacf)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </div>
+            <div class="option-card-body"><h4>Stainless Steel</h4><p>Premium, maintenance free</p></div>
+          </div>
+          <div class="option-card" data-group="finish" data-value="custom-metal">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#b8967a,#8b6f47)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>
+            </div>
+            <div class="option-card-body"><h4>Custom Metal</h4><p>Corten, brass, bronze &amp; more</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-panel" data-step="5">
+        <div class="step-number">Step 5</div>
+        <h2>Choose your infill</h2>
+        <p class="step-desc">Select the panel material between the frame.</p>
+        <div class="option-grid three-col">
+          <div class="option-card" data-group="infill" data-value="none">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1" stroke-dasharray="4 2"/></svg></div>
+            <div class="option-card-body"><h4>None</h4><p>Open frame only</p></div>
+          </div>
+          <div class="option-card" data-group="infill" data-value="chainlink">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8l4 4-4 4"/><path d="M10 8l4 4-4 4"/><path d="M16 8l4 4-4 4"/></svg></div>
+            <div class="option-card-body"><h4>Chain Link</h4><p>Woven diamond mesh</p></div>
+          </div>
+          <div class="option-card" data-group="infill" data-value="welded-wire">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16M4 12h16M4 16h16M8 4v16M12 4v16M16 4v16"/></svg></div>
+            <div class="option-card-body"><h4>Welded Wire</h4><p>Rigid grid mesh</p></div>
+          </div>
+          <div class="option-card" data-group="infill" data-value="wood">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#c4a06a,#a37d4e)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"><path d="M6 4v16M10 4v16M14 4v16M18 4v16"/></svg></div>
+            <div class="option-card-body"><h4>Wood</h4><p>Cedar or composite</p></div>
+          </div>
+          <div class="option-card" data-group="infill" data-value="vinyl">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#f0ece8,#ddd8d2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4v16M10 4v16M14 4v16M18 4v16"/></svg></div>
+            <div class="option-card-body"><h4>Vinyl</h4><p>Gapless PVC boards</p></div>
+          </div>
+          <div class="option-card" data-group="infill" data-value="sheet-metal">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/></svg></div>
+            <div class="option-card-body"><h4>Sheet Metal</h4><p>Full privacy panels</p></div>
+          </div>
+          <div class="option-card" data-group="infill" data-value="metal">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3v18M10 3v18M14 3v18M18 3v18"/></svg></div>
+            <div class="option-card-body"><h4>Metal Boards</h4><p>Flat bar or tubing</p></div>
+          </div>
+          <div class="option-card" data-group="infill" data-value="laser-cut">
+            <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#1d1d1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="option-card-image" style="background:linear-gradient(135deg,#2a2a2f,#1d1d1f)"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,185,16,0.5)" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div>
+            <div class="option-card-body"><h4>Custom Laser Cut</h4><p>Bespoke patterns</p></div>
+          </div>
+        </div>
+
+        <!-- Infill sub-options: shown dynamically for wood, metal, vinyl -->
+        <div id="infillSubOptions" style="display:none">
+          <div class="infill-sub-divider"></div>
+
+          <!-- Direction: wood + metal only -->
+          <div class="size-section" id="infillDirectionSection">
+            <div class="size-section-label">Picket Direction</div>
+            <div class="size-chips" data-group="infillDirection">
+              <div class="size-chip dir-chip" data-value="vertical">
+                <svg viewBox="0 0 30 20" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="5" y1="1" x2="5" y2="19"/>
+                  <line x1="11" y1="1" x2="11" y2="19"/>
+                  <line x1="17" y1="1" x2="17" y2="19"/>
+                  <line x1="23" y1="1" x2="23" y2="19"/>
+                </svg>
+                Vertical
+              </div>
+              <div class="size-chip dir-chip" data-value="horizontal">
+                <svg viewBox="0 0 30 20" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="1" y1="4" x2="29" y2="4"/>
+                  <line x1="1" y1="10" x2="29" y2="10"/>
+                  <line x1="1" y1="16" x2="29" y2="16"/>
+                </svg>
+                Horizontal
+              </div>
+              <div class="size-chip dir-chip" data-value="diagonal">
+                <svg viewBox="0 0 30 20" stroke-width="2.5" stroke-linecap="round">
+                  <line x1="-2" y1="20" x2="18" y2="0"/>
+                  <line x1="6" y1="20" x2="26" y2="0"/>
+                  <line x1="14" y1="20" x2="34" y2="0"/>
+                </svg>
+                Diagonal
+              </div>
+              <div class="size-chip dir-chip" data-value="custom">
+                <svg viewBox="0 0 30 20" stroke-width="2" stroke-linecap="round">
+                  <line x1="5" y1="1" x2="5" y2="19"/>
+                  <line x1="11" y1="1" x2="11" y2="19"/>
+                  <line x1="17" y1="8" x2="17" y2="19"/>
+                  <line x1="23" y1="1" x2="23" y2="19"/>
+                  <path d="M17 1 L14 5 M17 1 L20 5" stroke-width="1.5"/>
+                  <line x1="11" y1="10" x2="17" y2="8"/>
+                </svg>
+                Custom
+              </div>
+            </div>
+          </div>
+
+          <!-- Wood sub-options -->
+          <div id="woodSubOptions" style="display:none">
+            <div class="size-section">
+              <div class="size-section-label">Board Size</div>
+              <div class="size-chips" data-group="woodSize">
+                <div class="size-chip" data-value="1x6">1&times;6</div>
+                <div class="size-chip" data-value="5/4">5/4</div>
+                <div class="size-chip" data-value="2x6">2&times;6</div>
+                <div class="size-chip" data-value="2x8">2&times;8</div>
+              </div>
+            </div>
+            <div class="size-section">
+              <div class="size-section-label">Gap Between Boards</div>
+              <div class="size-chips" data-group="woodGap">
+                <div class="size-chip size-chip--wide" data-value="overlapping">Overlapping</div>
+                <div class="size-chip" data-value="0">0&Prime;</div>
+                <div class="size-chip" data-value="1">1&Prime;</div>
+                <div class="size-chip" data-value="2">2&Prime;</div>
+                <div class="size-chip" data-value="3">3&Prime;</div>
+                <div class="size-chip" data-value="4">4&Prime;</div>
+                <div class="size-chip" data-value="5">5&Prime;</div>
+                <div class="size-chip" data-value="6">6&Prime;</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metal sub-options -->
+          <div id="metalSubOptions" style="display:none">
+            <div class="size-section">
+              <div class="size-section-label">Profile Type</div>
+              <div class="size-chips" data-group="metalProfile">
+                <div class="size-chip" data-value="flatbar">Flat Bar</div>
+                <div class="size-chip" data-value="rect-tubing">Rect. Tubing</div>
+                <div class="size-chip" data-value="square-tubing">Square Tubing</div>
+              </div>
+            </div>
+            <div class="size-section">
+              <div class="size-section-label">Member Size</div>
+              <div class="size-chips" data-group="metalSize">
+                <div class="size-chip" data-value="3/4">3/4&Prime;</div>
+                <div class="size-chip" data-value="1">1&Prime;</div>
+                <div class="size-chip" data-value="1.5">1&frac12;&Prime;</div>
+                <div class="size-chip" data-value="2">2&Prime;</div>
+                <div class="size-chip" data-value="3">3&Prime;</div>
+                <div class="size-chip" data-value="4">4&Prime;</div>
+                <div class="size-chip" data-value="5">5&Prime;</div>
+                <div class="size-chip" data-value="6">6&Prime;</div>
+              </div>
+            </div>
+            <div class="size-section">
+              <div class="size-section-label">Gap Between Members</div>
+              <div class="size-chips" data-group="metalGap">
+                <div class="size-chip" data-value="3/4">3/4&Prime;</div>
+                <div class="size-chip" data-value="1">1&Prime;</div>
+                <div class="size-chip" data-value="1.5">1&frac12;&Prime;</div>
+                <div class="size-chip" data-value="2">2&Prime;</div>
+                <div class="size-chip" data-value="3">3&Prime;</div>
+                <div class="size-chip" data-value="4">4&Prime;</div>
+                <div class="size-chip" data-value="5">5&Prime;</div>
+                <div class="size-chip" data-value="6">6&Prime;</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vinyl sub-options (colour only, gapless design) -->
+          <div id="vinylSubOptions" style="display:none">
+            <div class="size-section">
+              <div class="size-section-label">Colour</div>
+              <div class="size-chips" data-group="vinylColor">
+                <div class="size-chip vinyl-chip" data-value="oak">
+                  <span class="vinyl-swatch" style="background:linear-gradient(135deg,#c4a06a,#a37d4e)"></span>Oak
+                </div>
+                <div class="size-chip vinyl-chip" data-value="white">
+                  <span class="vinyl-swatch" style="background:#f5f5f7;border:1px solid #ddd"></span>White
+                </div>
+                <div class="size-chip vinyl-chip" data-value="black">
+                  <span class="vinyl-swatch" style="background:linear-gradient(135deg,#3a3a3a,#1d1d1f)"></span>Black
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step-panel" data-step="6">
+        <div class="step-number">Step 6</div>
+        <h2>Add-ons &amp; accessories</h2>
+        <p class="step-desc">Complete your gate with accessories.</p>
+
+        <div class="addon-package" id="addonPackage" onclick="togglePackage()">
+          <div class="addon-package-header">
+            <h4>Complete Package</h4>
+            <span class="addon-package-badge">Best Value</span>
+          </div>
+          <p>Posts, automation brackets, and logo plate — bundled at a discount.</p>
+        </div>
+
+        <div class="addon-divider-label">Or choose individually</div>
+
+        <!-- Slide gate specific add-ons — only shown when gate type is slide -->
+        <div id="slideAddonsSection" style="display:none">
+          <div class="addon-divider-label" style="margin-top:0;margin-bottom:8px">Slide Gate Hardware</div>
+          <div class="addon-list" style="margin-bottom:16px">
+            <div class="addon-item" data-addon="rollers" onclick="toggleAddon(this)">
+              <div class="addon-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg></div>
+              <div class="addon-item-info"><h4>Nylon Cantilever Rollers</h4><p>Low-friction track-free roll system</p></div>
+              <div class="addon-toggle"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="addon-list">
+          <div class="addon-item" data-addon="logo" onclick="toggleAddon(this)">
+            <div class="addon-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 17l4-6 3 4 2-2 4 4"/></svg></div>
+            <div class="addon-item-info"><h4>Custom Logo Plate</h4><p>Laser-cut or engraved logo</p></div>
+            <div class="addon-toggle"></div>
+          </div>
+          <div class="addon-item" data-addon="posts" onclick="toggleAddon(this)">
+            <div class="addon-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2v20M18 2v20"/><path d="M6 6h12M6 18h12"/></svg></div>
+            <div class="addon-item-info"><h4>Gate Posts</h4><p>Matched posts with base plates</p></div>
+            <div class="addon-toggle"></div>
+          </div>
+          <div class="addon-item" data-addon="automation" onclick="toggleAddon(this)">
+            <div class="addon-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h4v4H6z"/><circle cx="16" cy="12" r="2"/></svg></div>
+            <div class="addon-item-info"><h4>Automation Brackets</h4><p>Pre-welded mounting brackets</p></div>
+            <div class="addon-toggle"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer nav -->
+    <div class="step-footer">
+      <button class="btn-back" id="btnBack" onclick="prevStep()" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Back
+      </button>
+      <div class="price-badge" id="priceBadge" onclick="togglePriceBreakdown()" style="display:none">
+        <span class="price-badge-label">Est. Price</span>
+        <span class="price-badge-value" id="priceBadgeValue">—</span>
+        <span class="price-badge-hint">tap for breakdown</span>
+      </div>
+      <button class="btn-primary" id="btnNext" onclick="nextStep()">Continue</button>
+    </div>
+
+    <!-- Price breakdown popup -->
+    <div class="price-breakdown-popup" id="priceBreakdown">
+      <div class="price-breakdown-title">Price Breakdown</div>
+      <div id="priceBreakdownRows"></div>
+      <div class="price-breakdown-note">&#9432; Estimated retail price (CAD). Includes materials, finishing, and hardware. Final quote may vary.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const state = {
+    step:1, gateType:null, swingType:null, foldType:null, height:null, width:null,
+    frameShape:'rectangle', bracing:null,
+    finish:null, infill:null,
+    infillDirection:null,
+    woodSize:null, woodGap:null,
+    metalProfile:null, metalSize:null, metalGap:null,
+    vinylColor:null,
+    addons:new Set(), package:false,
+    contact: { name:'', email:'', phone:'', request:'' },
+    contactSaved: false
+  };
+
+  const widthOptions = {
+    slide:         [10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40],
+    'swing-single':[10,12,14,16,18,20],
+    'swing-double':[10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40],
+    'fold-single': [10,12,14,16,18,20],
+    'fold-double': [10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40],
+    barrier:       [10,12,14,16,18,20,22,24,26,28]
+  };
+
+  const names = {
+    gateType:{slide:'Slide Gate',swing:'Swing Gate',fold:'Bi-Fold Gate',barrier:'Barrier Arm'},
+    finish:{galvanized:'Galvanized Steel','powder-black':'Powder Coat — Black','powder-custom':'Powder Coat — Custom',aluminum:'Raw Aluminum',stainless:'Stainless Steel','custom-metal':'Custom Metal'},
+    infill:{none:'None (Open Frame)',chainlink:'Chain Link','welded-wire':'Welded Wire',wood:'Wood',vinyl:'Vinyl','sheet-metal':'Sheet Metal',metal:'Metal Boards','laser-cut':'Custom Laser Cut'}
+  };
+
+  const typeDesc = {
+    slide:'Rolls horizontally on a track. Ideal for wide openings.',
+    swing:'Classic hinged operation. Single or double leaf.',
+    fold:'Folds vertically for fast, high-security operation.',
+    barrier:'Boom-style barrier for parking and traffic control.'
+  };
+
+  const stepLabels = ['Gate Type','Size','Frame','Finish','Infill','Add-ons'];
+
+  // Gate type
+  function selectGateType(btn) {
+    document.querySelectorAll('.type-icon-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    state.gateType = btn.dataset.value;
+    if (state.gateType !== 'swing') {
+      state.swingType = null;
+      document.querySelectorAll('#swingTypeChips .size-chip').forEach(c => c.classList.remove('selected'));
+    }
+    if (state.gateType !== 'fold') {
+      state.foldType = null;
+      document.querySelectorAll('#foldTypeChips .size-chip').forEach(c => c.classList.remove('selected'));
+    }
+    state.width = null;
+    // Pre-select posts + rollers for slide; remove rollers for others
+    if (state.gateType === 'slide') {
+      state.addons.add('posts');
+      state.addons.add('rollers');
+    } else {
+      state.addons.delete('rollers');
+    }
+    updateSwingTypeVisibility();
+    updateFoldTypeVisibility();
+    updateHeightOptions();
+    buildWidthChips();
+    updatePreview();
+    updateBreadcrumbs();
+  }
+
+  function updateSwingTypeVisibility() {
+    const section = document.getElementById('swingTypeSection');
+    if (section) section.style.display = (state.gateType === 'swing') ? '' : 'none';
+  }
+
+  function updateFoldTypeVisibility() {
+    const section = document.getElementById('foldTypeSection');
+    if (section) section.style.display = (state.gateType === 'fold') ? '' : 'none';
+  }
+
+  function updateHeightOptions() {
+    const chip8 = document.getElementById('height8chip');
+    if (!chip8) return;
+    if (state.gateType === 'barrier') {
+      chip8.style.display = 'none';
+      if (state.height === '8') state.height = null;
+    } else {
+      chip8.style.display = '';
+    }
+  }
+
+  function updateInfillSubOptions() {
+    const infill = state.infill;
+    const hasDir = infill === 'wood' || infill === 'metal';
+    const hasSub = hasDir || infill === 'vinyl';
+    document.getElementById('infillSubOptions').style.display = hasSub ? '' : 'none';
+    document.getElementById('infillDirectionSection').style.display = hasDir ? '' : 'none';
+    document.getElementById('woodSubOptions').style.display = infill === 'wood' ? '' : 'none';
+    document.getElementById('metalSubOptions').style.display = infill === 'metal' ? '' : 'none';
+    document.getElementById('vinylSubOptions').style.display = infill === 'vinyl' ? '' : 'none';
+  }
+
+  function clearInfillSubState() {
+    state.infillDirection = null;
+    state.woodSize = null; state.woodGap = null;
+    state.metalProfile = null; state.metalSize = null; state.metalGap = null;
+    state.vinylColor = null;
+    document.querySelectorAll('#infillSubOptions .size-chip').forEach(c => c.classList.remove('selected'));
+  }
+
+  // Option cards
+  document.querySelectorAll('.option-card').forEach(card => {
+    card.addEventListener('click', () => {
+      if (card.classList.contains('disabled')) return;
+      const group = card.dataset.group;
+      const val = card.dataset.value;
+
+      // Infill conflict check: wood/metal + cable bracing
+      if (group === 'infill' && (val === 'wood' || val === 'metal') && isCableBracing(state.bracing)) {
+        showBracingConflict(val, card);
+        return;
+      }
+
+      card.closest('.option-grid').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state[group] = val;
+
+      if (group === 'infill') {
+        clearInfillSubState();
+        updateInfillSubOptions();
+        updateBracingOptions();
+      }
+      updatePreview();
+      updateBreadcrumbs();
+    });
+  });
+
+  // Size chips
+  document.querySelectorAll('.size-chips').forEach(container => {
+    container.addEventListener('click', e => {
+      const chip = e.target.closest('.size-chip');
+      if (!chip) return;
+      container.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      const group = container.dataset.group;
+      state[group] = chip.dataset.value;
+      if (group === 'swingType' || group === 'foldType') {
+        state.width = null;
+        buildWidthChips();
+      }
+      if (group === 'infillDirection') updatePreviewSVG();
+      updatePreview();
+      updateBreadcrumbs();
+    });
+  });
+
+  function buildWidthChips() {
+    const c = document.getElementById('widthChips');
+    let key = state.gateType || 'slide';
+    if (key === 'swing') key = state.swingType ? `swing-${state.swingType}` : null;
+    if (key === 'fold') key = state.foldType ? `fold-${state.foldType}` : null;
+    const w = key ? (widthOptions[key] || []) : [];
+    if (!w.length && state.gateType === 'swing') {
+      c.innerHTML = '<span style="font-size:13px;color:var(--gray-mid);padding:6px 0;display:block">Select Single or Double above first</span>';
+    } else if (!w.length && state.gateType === 'fold') {
+      c.innerHTML = '<span style="font-size:13px;color:var(--gray-mid);padding:6px 0;display:block">Select Single or Double above first</span>';
+    } else {
+      c.innerHTML = w.map(v => `<div class="size-chip" data-value="${v}">${v} ft</div>`).join('');
+    }
+    // Re-apply previous width selection if still valid
+    if (state.width && w.includes(+state.width)) {
+      c.querySelector(`.size-chip[data-value="${state.width}"]`)?.classList.add('selected');
+    } else if (!w.includes(+(state.width))) {
+      state.width = null;
+    }
+  }
+
+  // Add-ons
+  function updateSlideAddonsVisibility() {
+    const section = document.getElementById('slideAddonsSection');
+    if (section) section.style.display = (state.gateType === 'slide') ? '' : 'none';
+  }
+
+  function syncAddonUI() {
+    // Sync all addon-item toggle states to match state.addons set
+    document.querySelectorAll('.addon-item').forEach(el => {
+      el.classList.toggle('selected', state.addons.has(el.dataset.addon));
+    });
+  }
+
+  function toggleAddon(el) {
+    const a = el.dataset.addon;
+    el.classList.toggle('selected');
+    state.addons.has(a) ? state.addons.delete(a) : state.addons.add(a);
+    if (state.addons.size > 0) { state.package = false; document.getElementById('addonPackage').classList.remove('selected'); }
+    updateBreadcrumbs();
+  }
+  function togglePackage() {
+    state.package = !state.package;
+    document.getElementById('addonPackage').classList.toggle('selected', state.package);
+    if (state.package) { state.addons.clear(); document.querySelectorAll('.addon-item').forEach(el => el.classList.remove('selected')); }
+    updateBreadcrumbs();
+  }
+
+  // ── Frame & Bracing ──
+  function getDefaultBracing() {
+    const w = parseInt(state.width) || 0;
+    if (w > 20) return 'rigid-diagonal';
+    if (w > 16) return 'cable-double-x';
+    return 'cable-diagonal';
+  }
+
+  function isCableBracing(b) {
+    return b === 'cable-diagonal' || b === 'cable-double-x';
+  }
+
+  function applyFrameDefaults() {
+    // Pre-select Rectangle if none chosen
+    if (!state.frameShape) state.frameShape = 'rectangle';
+    document.querySelectorAll('#frameShapeGrid .option-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.value === state.frameShape);
+    });
+    // Pre-select default bracing if none chosen
+    if (!state.bracing) {
+      state.bracing = getDefaultBracing();
+    }
+    document.querySelectorAll('#bracingGrid .option-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.value === state.bracing);
+    });
+  }
+
+  function updateBracingOptions() {
+    const w = parseInt(state.width) || 0;
+    const needsRigid = state.infill === 'wood' || state.infill === 'metal';
+    const tags = {
+      'cable-diagonal':  { available: !needsRigid && w <= 16, label: w <= 16 ? (w > 0 ? 'Current size' : '') : 'Max 16 ft' },
+      'cable-double-x':  { available: !needsRigid && w <= 20, label: w <= 16 ? 'Upgrade' : (w <= 20 ? 'Default' : '') },
+      'rigid-diagonal':  { available: true, label: w > 20 ? 'Required' : 'Upgrade' },
+      'rigid-x':         { available: true, label: 'Upgrade' },
+      'bottom-beam':     { available: true, label: '' },
+      'center-beam':     { available: true, label: '' },
+    };
+
+    let hint = '';
+    if (needsRigid) hint = 'Cable bracing not compatible with wood or metal board infill.';
+    else if (w > 20) hint = 'Opening over 20 ft — rigid bracing required.';
+    else if (w > 16) hint = 'Opening 16–20 ft — double X cable or rigid bracing.';
+    else if (w > 0) hint = 'Opening ≤ 16 ft — cable diagonal default; double X available as upgrade.';
+    document.getElementById('bracingHint').textContent = hint;
+
+    document.querySelectorAll('#bracingGrid .option-card').forEach(card => {
+      const val = card.dataset.value;
+      const info = tags[val];
+      const disabled = !info.available;
+      card.classList.toggle('disabled', disabled);
+
+      const tagEl = document.getElementById('tag-' + val);
+      if (tagEl) {
+        tagEl.textContent = '';
+        tagEl.className = 'brace-tag';
+        if (val === 'rigid-diagonal' && w > 20) { tagEl.textContent = 'Required'; tagEl.classList.add('required'); }
+        else if (val === 'cable-diagonal' && !needsRigid && w <= 16 && w > 0) { tagEl.textContent = 'Default'; tagEl.classList.add('active-size'); }
+        else if (val === 'cable-double-x' && !needsRigid && w > 16 && w <= 20) { tagEl.textContent = 'Default'; tagEl.classList.add('active-size'); }
+        else if (val === 'cable-double-x' && !needsRigid && w <= 16 && w > 0) { tagEl.textContent = 'Upgrade'; tagEl.classList.add('upgrade'); }
+        else if ((val === 'rigid-diagonal' || val === 'rigid-x') && w <= 20) { tagEl.textContent = 'Upgrade'; tagEl.classList.add('upgrade'); }
+      }
+
+      // If currently selected option becomes disabled, switch to rigid-diagonal
+      if (disabled && state.bracing === val) {
+        state.bracing = 'rigid-diagonal';
+        document.querySelectorAll('#bracingGrid .option-card').forEach(c => {
+          c.classList.toggle('selected', c.dataset.value === state.bracing);
+        });
+      }
+    });
+  }
+
+  // Bracing conflict modal
+  let _pendingInfill = null;
+  let _pendingInfillCard = null;
+
+  function showBracingConflict(infillVal, card) {
+    _pendingInfill = infillVal;
+    _pendingInfillCard = card;
+    document.getElementById('bracingConflictModal').style.display = 'flex';
+  }
+
+  function bracingConflictAccept() {
+    // Switch bracing to rigid diagonal
+    state.bracing = 'rigid-diagonal';
+    document.querySelectorAll('#bracingGrid .option-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.value === 'rigid-diagonal');
+    });
+    // Apply the pending infill
+    if (_pendingInfillCard) {
+      _pendingInfillCard.closest('.option-grid').querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+      _pendingInfillCard.classList.add('selected');
+    }
+    state.infill = _pendingInfill;
+    clearInfillSubState();
+    updateInfillSubOptions();
+    _pendingInfill = null; _pendingInfillCard = null;
+    document.getElementById('bracingConflictModal').style.display = 'none';
+    updateBracingOptions();
+    updatePreview();
+    updateBreadcrumbs();
+  }
+
+  function bracingConflictBack() {
+    _pendingInfill = null; _pendingInfillCard = null;
+    document.getElementById('bracingConflictModal').style.display = 'none';
+  }
+
+  // Steps
+  function showStep(n) {
+    state.step = n;
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.step-panel[data-step="${n}"]`).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach(d => {
+      const s = +d.dataset.step;
+      d.classList.toggle('active', s === n);
+      d.classList.toggle('completed', s < n);
+    });
+    document.getElementById('btnBack').disabled = (n === 1);
+    document.getElementById('btnNext').textContent = (n === 6) ? 'Get Your Quote' : 'Continue';
+    if (n === 2) { updateSwingTypeVisibility(); updateFoldTypeVisibility(); updateHeightOptions(); buildWidthChips(); }
+    if (n === 6) { updateSlideAddonsVisibility(); syncAddonUI(); }
+    if (n === 3) { applyFrameDefaults(); updateBracingOptions(); }
+    // Scroll page to top of panel area
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateBreadcrumbs();
+  }
+
+  function nextStep() {
+    if (state.step === 6) { submitQuote(); return; }
+    showStep(state.step + 1);
+  }
+  function prevStep() {
+    if (state.step > 1) showStep(state.step - 1);
+  }
+
+  document.querySelectorAll('.step-dot').forEach(dot => {
+    dot.addEventListener('click', () => showStep(+dot.dataset.step));
+  });
+
+  // Preview SVG — updates the gate illustration based on infill + direction
+  function updatePreviewSVG() {
+    const el = document.querySelector('.placeholder-gate');
+    if (!el) return;
+    const infill = state.infill;
+    const dir = state.infillDirection;
+    const effDir = (infill === 'vinyl') ? 'vertical' : (dir || 'vertical');
+
+    // Gate frame: outer rect, posts, mid-rail
+    const frame = `
+      <rect x="6" y="8" width="108" height="64" rx="2" stroke-width="1.5"/>
+      <rect x="6" y="8" width="9" height="64" rx="1" fill="currentColor" fill-opacity="0.25" stroke-width="0.7"/>
+      <rect x="105" y="8" width="9" height="64" rx="1" fill="currentColor" fill-opacity="0.25" stroke-width="0.7"/>
+      <line x1="6" y1="37" x2="114" y2="37" stroke-width="1.5"/>
+    `;
+
+    const clip = `<defs><clipPath id="gc"><rect x="15" y="12" width="90" height="56"/></clipPath></defs>`;
+    const cg = `clip-path="url(#gc)"`;
+    let pat = '';
+
+    if (!infill || infill === 'none') {
+      pat = `<rect x="15" y="12" width="90" height="56" fill="none" stroke-dasharray="3 3" stroke-width="0.7" opacity="0.4"/>`;
+
+    } else if (infill === 'chainlink') {
+      pat = clip + `<g ${cg} stroke-width="0.8">`;
+      for (let x = -5; x < 130; x += 12) {
+        pat += `<polyline points="${x},68 ${x+6},12 ${x+12},68"/>`;
+      }
+      for (let y = 12; y < 70; y += 14) {
+        pat += `<line x1="15" y1="${y}" x2="105" y2="${y}" stroke-width="0.5"/>`;
+      }
+      pat += `</g>`;
+
+    } else if (infill === 'welded-wire') {
+      pat = clip + `<g ${cg} stroke-width="0.8">`;
+      for (let x = 20; x < 108; x += 10) pat += `<line x1="${x}" y1="12" x2="${x}" y2="68"/>`;
+      for (let y = 17; y < 70; y += 9) pat += `<line x1="15" y1="${y}" x2="105" y2="${y}"/>`;
+      pat += `</g>`;
+
+    } else if (infill === 'sheet-metal') {
+      pat = `
+        <rect x="15" y="12" width="90" height="25" fill="currentColor" fill-opacity="0.18" stroke-width="0.7" rx="0.5"/>
+        <rect x="15" y="41" width="90" height="27" fill="currentColor" fill-opacity="0.18" stroke-width="0.7" rx="0.5"/>
+      `;
+
+    } else if (infill === 'laser-cut') {
+      pat = clip + `<g ${cg}>`;
+      pat += `<rect x="15" y="12" width="90" height="56" fill="currentColor" fill-opacity="0.1" stroke="none"/>`;
+      [33, 55, 77].forEach(cx => {
+        pat += `<circle cx="${cx}" cy="27" r="8" fill="white" stroke-width="0.7"/><circle cx="${cx}" cy="54" r="10" fill="white" stroke-width="0.7"/>`;
+      });
+      pat += `</g>`;
+
+    } else {
+      // wood, metal, vinyl — direction-based boards
+      const bW = (infill === 'wood') ? 8 : 3;
+      const gap = (infill === 'vinyl') ? 0 : (infill === 'wood') ? 3 : 5;
+      const bH = (infill === 'wood') ? 7 : 3;
+      const gH = (infill === 'vinyl') ? 0 : (infill === 'wood') ? 3 : 5;
+      const fOp = (infill === 'wood') ? 0.16 : 0.13;
+      pat = clip + `<g ${cg}>`;
+      if (effDir === 'vertical') {
+        for (let x = 15; x < 106; x += bW + gap) {
+          pat += `<rect x="${x}" y="12" width="${bW}" height="56" rx="0.5" fill="currentColor" fill-opacity="${fOp}" stroke-width="0.5"/>`;
+        }
+      } else if (effDir === 'horizontal') {
+        for (let y = 12; y < 69; y += bH + gH) {
+          pat += `<rect x="15" y="${y}" width="90" height="${bH}" rx="0.5" fill="currentColor" fill-opacity="${fOp}" stroke-width="0.5"/>`;
+        }
+      } else if (effDir === 'diagonal') {
+        const sw = (infill === 'wood') ? 7 : 3;
+        for (let i = -8; i < 16; i++) {
+          const ox = i * 11;
+          pat += `<line x1="${15+ox}" y1="68" x2="${15+ox+56}" y2="12" stroke-width="${sw}" stroke-linecap="square" stroke-opacity="${fOp * 4}"/>`;
+        }
+      } else {
+        // custom — mixed pattern hint
+        pat += `<rect x="15" y="12" width="90" height="56" stroke-dasharray="2 2" stroke-width="0.8" fill="none"/>`;
+        for (let x = 15; x < 106; x += 14) pat += `<rect x="${x}" y="12" width="6" height="56" rx="0.5" fill="currentColor" fill-opacity="0.08" stroke="none"/>`;
+        for (let y = 25; y < 70; y += 20) pat += `<rect x="15" y="${y}" width="90" height="4" rx="0.5" fill="currentColor" fill-opacity="0.1" stroke="none"/>`;
+      }
+      pat += `</g>`;
+    }
+
+    el.innerHTML = frame + pat;
+    el.style.opacity = infill ? '0.55' : '0.12';
+  }
+
+  // Preview
+  function updatePreview() {
+    const badge = document.getElementById('previewBadge');
+    const desc = document.getElementById('previewDesc');
+    const parts = [];
+    if (state.gateType) parts.push(names.gateType[state.gateType]);
+    if (state.height) parts.push(state.height + ' ft H');
+    if (state.width) parts.push(state.width + ' ft W');
+    if (state.finish) parts.push(names.finish[state.finish]);
+    if (state.infill) parts.push(names.infill[state.infill]);
+
+    if (parts.length) {
+      badge.textContent = parts.join('  ·  ');
+      badge.classList.add('visible');
+    } else {
+      badge.classList.remove('visible');
+    }
+
+    if (state.gateType) {
+      desc.textContent = typeDesc[state.gateType];
+      desc.classList.add('visible');
+    } else {
+      desc.classList.remove('visible');
+    }
+    updatePreviewSVG();
+  }
+
+  // Breadcrumbs — always show all 5 steps; selections if made, otherwise step title
+  const stepTitles = ['Gate Type','Size','Frame','Finish','Infill','Add-ons'];
+
+  const frameShapeNames = {
+    rectangle:'Rectangle', arch:'Arch', 'reverse-arch':'Reverse Arch',
+    'bell-curve':'Bell Curve', peak:'Peak', slant:'Slant', custom:'Custom'
+  };
+  const bracingNames = {
+    'cable-diagonal':'Cable Diagonal', 'cable-double-x':'Double X Cable',
+    'rigid-diagonal':'Rigid Diagonal', 'rigid-x':'Rigid X Brace',
+    'bottom-beam':'Bottom Beam', 'center-beam':'Center Beam'
+  };
+
+  function getCrumbText(step) {
+    switch(step) {
+      case 1: return state.gateType ? names.gateType[state.gateType] : null;
+      case 2: {
+        const p = [];
+        if (state.swingType) p.push(state.swingType === 'single' ? 'Single' : 'Double');
+        if (state.foldType) p.push(state.foldType === 'single' ? 'Single' : 'Double');
+        if (state.height) p.push(state.height + 'ft Height');
+        if (state.width) p.push(state.width + 'ft Opening');
+        return p.length ? p.join(', ') : null;
+      }
+      case 3: {
+        const p = [];
+        if (state.frameShape && state.frameShape !== 'rectangle') p.push(frameShapeNames[state.frameShape]);
+        if (state.bracing) p.push(bracingNames[state.bracing]);
+        return p.length ? p.join(', ') : (state.frameShape ? 'Rectangle, ' + (state.bracing ? bracingNames[state.bracing] : 'Bracing TBD') : null);
+      }
+      case 4: return state.finish ? names.finish[state.finish] + ' Finish' : null;
+      case 5: {
+        if (!state.infill) return null;
+        let t = names.infill[state.infill];
+        if (state.infillDirection) t += ', ' + state.infillDirection[0].toUpperCase() + state.infillDirection.slice(1);
+        else if (state.vinylColor) t += ', ' + state.vinylColor[0].toUpperCase() + state.vinylColor.slice(1);
+        return t + ' Infill';
+      }
+      case 6: {
+        if (state.package) return 'Complete Package';
+        if (state.addons.size > 0) {
+          const an = { logo:'Logo', posts:'Posts', automation:'Brackets', rollers:'Rollers' };
+          return [...state.addons].map(a => an[a]).join(', ');
+        }
+        return null;
+      }
+    }
+  }
+
+  function updateBreadcrumbs() {
+    updatePriceDisplay();
+    const el = document.getElementById('breadcrumbs');
+    let html = '';
+    for (let i = 1; i <= 6; i++) {
+      if (i > 1) html += '<span class="crumb-sep">&#9656;</span>';
+      const val = getCrumbText(i);
+      const isActive = (i === state.step);
+      const hasValue = !!val;
+      const label = val || stepTitles[i - 1];
+      const classes = ['crumb-item'];
+      if (isActive) classes.push('active-step');
+      if (hasValue) classes.push('has-value');
+      html += `<span class="${classes.join(' ')}" onclick="showStep(${i})">${label}</span>`;
+    }
+    el.innerHTML = html;
+    // Auto-scroll active crumb into view
+    requestAnimationFrame(() => {
+      const active = el.querySelector('.active-step');
+      if (active) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    });
+  }
+
+  // Quote
+  function submitQuote() {
+    const missing = [];
+    if (!state.gateType) missing.push('Gate Type');
+    if (!state.height) missing.push('Height');
+    if (!state.width) missing.push('Width');
+    if (!state.bracing) missing.push('Bracing');
+    if (!state.finish) missing.push('Finish');
+    if (!state.infill) missing.push('Infill');
+    if (missing.length) { alert('Please complete:\n\n• ' + missing.join('\n• ')); return; }
+    // Require contact info
+    if (!state.contactSaved) {
+      showContactModal();
+      // After modal closes via submitContact(), re-trigger quote
+      const origSubmit = document.getElementById('contactModal').dataset.quoteMode;
+      document.getElementById('contactModal').dataset.quoteMode = '1';
+      return;
+    }
+    const addons = state.package ? 'Complete Package' : (state.addons.size ? [...state.addons].join(', ') : 'None');
+    const contact = state.contact;
+    alert(`Quote Request Submitted!\n\nName: ${contact.name || '—'}\nEmail: ${contact.email || '—'}\nPhone: ${contact.phone || '—'}\n\n${names.gateType[state.gateType]}\n${state.height}ft H × ${state.width}ft W\nFrame: ${frameShapeNames[state.frameShape]}, ${bracingNames[state.bracing]}\n${names.finish[state.finish]}\n${names.infill[state.infill]}\nAdd-ons: ${addons}${contact.request ? '\n\nCustom request: ' + contact.request : ''}`);
+  }
+
+  // ── Pricing Engine ──
+  const STEEL_TUBE_PER_FT  = 80 / 24;         // owner cost: $80/24ft stick
+  const ALUM_TUBE_PER_FT   = 11.00;           // owner cost CAD/ft
+  const SS_TUBE_PER_FT     = 35.00;           // owner cost CAD/ft
+  const STEEL_LBS_PER_FT   = 3.06;            // lbs/ft of 2x2x.125 steel tube
+  const SQFT_PER_LIN_FT    = 4 * (2/12);     // 4 sides × 2" = 0.667 sqft/lin ft tube
+  const GALV_PER_LB        = 0.70;            // owner cost $/lb (post-galv weight)
+  const POWDER_PER_SQFT    = 17/3;            // owner cost — customer sees $17/sqft after ×3
+  const SHEET_LBS_PER_SQFT = 5.1;            // 1/8" mild steel ≈ 5.1 lbs/sqft
+  const POST_EACH          = 100;
+  const SLIDE_ROLLERS      = 250;
+  const SWING_HINGES       = 100;
+  const FOLD_MECHANISM     = 1000;
+  const ADDON_LOGO         = 100;
+  const ADDON_AUTO         = 150;
+  const MARKUP             = 3;
+
+  // Wood board dimensions (actual width in inches) and owner cost per lin ft (Home Depot CA)
+  const WOOD_BOARDS = {
+    '1x6':  { actualIn: 5.5,  costPerLinFt: 1.80 },
+    '5/4':  { actualIn: 5.5,  costPerLinFt: 2.20 },
+    '2x6':  { actualIn: 5.5,  costPerLinFt: 2.80 },
+    '2x8':  { actualIn: 7.25, costPerLinFt: 3.50 },
+  };
+  const WOOD_GAP_IN = { overlapping: -0.5, '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6 };
+
+  // Cable diameter for bracing: 3/8" stainless aircraft cable
+  const CABLE_PER_FT   = 2.50;  // owner cost CAD/ft
+  const CABLE_HW       = 40;    // turnbuckles + thimbles per diagonal run
+  const RIGID_PER_FT   = 3.00;  // owner cost: 1/4"x2" flat bar $/ft
+  const BEAM_PER_FT    = STEEL_TUBE_PER_FT; // same tubing as frame
+
+  function calcInfillCost(W, H) {
+    // Returns { cost (owner), extraSurfSqft, extraWeightLbs, label }
+    const area = W * H;
+    if (!state.infill || state.infill === 'none') return null;
+
+    switch (state.infill) {
+      case 'chainlink': {
+        // $12/lin ft of gate width (owner cost)
+        return { cost: 12 * W, label: `Chain Link (${W} lin ft)`, extraSurf: 0, extraWeight: 0 };
+      }
+      case 'welded-wire': {
+        return { cost: 11 * area, label: `Welded Wire (${area.toFixed(0)} sqft)`, extraSurf: 0, extraWeight: 0 };
+      }
+      case 'wood': {
+        const board = state.woodSize ? WOOD_BOARDS[state.woodSize] : WOOD_BOARDS['1x6'];
+        const gapIn = state.woodGap !== null ? (WOOD_GAP_IN[state.woodGap] ?? 0) : 0;
+        const spacing = board.actualIn + gapIn; // inches per board
+        const boardsNeeded = Math.ceil((W * 12) / spacing);
+        const totalLinFt = boardsNeeded * H;
+        const cost = totalLinFt * board.costPerLinFt;
+        const boardLabel = state.woodSize || '1x6';
+        return { cost, label: `Wood Boards — ${boardLabel} (${boardsNeeded} pcs × ${H}ft)`, extraSurf: 0, extraWeight: 0 };
+      }
+      case 'vinyl': {
+        return { cost: 14 * area, label: `Vinyl Infill (${area.toFixed(0)} sqft)`, extraSurf: 0, extraWeight: 0 };
+      }
+      case 'sheet-metal': {
+        // $20/sqft material + both sides add to finish, 1/8" thick steel adds weight
+        const extraSurf = area * 2; // both faces
+        const extraWeight = area * SHEET_LBS_PER_SQFT;
+        return { cost: 20 * area, label: `Sheet Metal (${area.toFixed(0)} sqft)`, extraSurf, extraWeight };
+      }
+      case 'metal': {
+        // Metal boards $25/sqft + finish applied on top (surface area = 2 sides)
+        const extraSurf = area * 2;
+        const extraWeight = area * SHEET_LBS_PER_SQFT * 0.6; // boards ~60% coverage
+        return { cost: 25 * area, label: `Metal Boards (${area.toFixed(0)} sqft)`, extraSurf, extraWeight };
+      }
+      case 'laser-cut': {
+        return { cost: 30 * area, label: `Custom Laser Cut (${area.toFixed(0)} sqft)`, extraSurf: area * 2, extraWeight: area * SHEET_LBS_PER_SQFT };
+      }
+      default: return null;
+    }
+  }
+
+  function calcBracingCost(W, H) {
+    if (!state.bracing || !W || !H) return null;
+    const diag = Math.sqrt(W * W + H * H);
+    switch (state.bracing) {
+      case 'cable-diagonal':
+        return { cost: diag * CABLE_PER_FT + CABLE_HW, label: `Cable Diagonal Brace (${diag.toFixed(1)} ft)` };
+      case 'cable-double-x':
+        return { cost: 2 * (diag * CABLE_PER_FT + CABLE_HW), label: `Double X Cable Brace (${(2*diag).toFixed(1)} ft)` };
+      case 'rigid-diagonal':
+        return { cost: diag * RIGID_PER_FT, label: `Rigid Diagonal Brace (${diag.toFixed(1)} ft)` };
+      case 'rigid-x':
+        return { cost: 2 * diag * RIGID_PER_FT, label: `Rigid X Brace (${(2*diag).toFixed(1)} ft)` };
+      case 'bottom-beam':
+        return { cost: W * BEAM_PER_FT, label: `Bottom Beam (${W} ft)` };
+      case 'center-beam':
+        return { cost: W * BEAM_PER_FT, label: `Center Beam (${W} ft)` };
+      default: return null;
+    }
+  }
+
+  function frameLinFt(gateType, swingType, foldType, W, H) {
+    if (!W || !H) return 0;
+    switch (gateType) {
+      case 'slide': {
+        // 3 horizontal rails + end verticals + 1 intermediate per ≤4ft span
+        const intermediates = Math.ceil(W / 4) - 1;
+        return 3 * W + H * (2 + intermediates);
+      }
+      case 'swing': {
+        if (swingType === 'double') {
+          // Two panels each W/2: 3 rails + 2 verticals per panel
+          return 2 * (3 * (W / 2) + 2 * H);
+        }
+        return 3 * W + 2 * H;
+      }
+      case 'fold': {
+        const panels = foldType === 'double' ? 2 : 1;
+        const pw = W / panels;
+        // Each panel: 3 rails + 2 verticals + 10% extra for fold knuckle structure
+        return panels * (3 * pw + 2 * H) * 1.1;
+      }
+      case 'barrier':
+        return W + 4; // arm + small pivot mount frame
+      default: return 0;
+    }
+  }
+
+  function calcPrice() {
+    const W = parseInt(state.width) || 0;
+    const H = parseInt(state.height) || 0;
+    if (!state.gateType || !W || !H) return null;
+
+    const linFt = frameLinFt(state.gateType, state.swingType, state.foldType, W, H);
+
+    // Frame tube material cost
+    let tubePerFt;
+    switch (state.finish) {
+      case 'aluminum':  tubePerFt = ALUM_TUBE_PER_FT; break;
+      case 'stainless': tubePerFt = SS_TUBE_PER_FT; break;
+      default:          tubePerFt = STEEL_TUBE_PER_FT;
+    }
+    const materialCost = linFt * tubePerFt;
+
+    // Infill cost (may add extra surface area / weight for finish calc)
+    const infill = calcInfillCost(W, H);
+    const infillCost  = infill ? infill.cost : 0;
+    const extraSurf   = infill ? (infill.extraSurf || 0) : 0;
+    const extraWeight = infill ? (infill.extraWeight || 0) : 0;
+
+    // Finish cost — includes frame + any infill surface area/weight additions
+    let finishCost = 0, finishLabel = '';
+    const frameWeight = linFt * STEEL_LBS_PER_FT;
+    const totalWeight = frameWeight + extraWeight;
+    const frameSurf   = linFt * SQFT_PER_LIN_FT;
+    const totalSurf   = frameSurf + extraSurf;
+    switch (state.finish) {
+      case 'galvanized': {
+        finishCost  = totalWeight * 1.06 * GALV_PER_LB;
+        finishLabel = `Galvanizing (${totalWeight.toFixed(0)} lbs → ${(totalWeight*1.06).toFixed(0)} lbs)`;
+        break;
+      }
+      case 'powder-black':
+      case 'powder-custom':
+      case 'aluminum':
+      case 'custom-metal': {
+        finishCost  = totalSurf * POWDER_PER_SQFT;
+        finishLabel = `Powder Coat (${totalSurf.toFixed(0)} sqft)`;
+        break;
+      }
+      case 'stainless':
+        finishLabel = 'No additional coating';
+        break;
+    }
+
+    // Bracing cost
+    const bracing = calcBracingCost(W, H);
+    const bracingCost = bracing ? bracing.cost : 0;
+
+    // Hardware lines
+    const hwLines = [];
+    if (state.addons.has('posts')) {
+      const n = state.gateType === 'barrier' ? 1 : 2;
+      hwLines.push({ label: `Gate Posts (×${n})`, cost: n * POST_EACH });
+    }
+    if (state.gateType === 'slide' && state.addons.has('rollers')) {
+      hwLines.push({ label: 'Nylon Cantilever Rollers', cost: SLIDE_ROLLERS });
+    }
+    if (state.gateType === 'swing' || state.gateType === 'barrier') {
+      hwLines.push({ label: 'Hinges (set of 2)', cost: SWING_HINGES });
+    }
+    if (state.gateType === 'fold') {
+      hwLines.push({ label: 'Folding Mechanism Hardware', cost: FOLD_MECHANISM });
+    }
+    if (state.addons.has('logo'))       hwLines.push({ label: 'Custom Logo Plate', cost: ADDON_LOGO });
+    if (state.addons.has('automation')) hwLines.push({ label: 'Automation Brackets', cost: ADDON_AUTO });
+
+    const hwCost    = hwLines.reduce((s, l) => s + l.cost, 0);
+    const totalCost = materialCost + infillCost + finishCost + bracingCost + hwCost;
+    const retail    = totalCost * MARKUP;
+
+    // Build retail-priced display lines
+    const lines = [];
+    lines.push({ label: `Frame — ${linFt.toFixed(1)} lin ft of 2×2 tubing`, cost: materialCost * MARKUP });
+    if (bracing) lines.push({ label: bracing.label, cost: bracingCost * MARKUP });
+    if (infill)  lines.push({ label: infill.label,  cost: infillCost  * MARKUP });
+    if (finishCost > 0) lines.push({ label: finishLabel, cost: finishCost * MARKUP });
+    else if (finishLabel) lines.push({ label: finishLabel, cost: 0 });
+    for (const l of hwLines) lines.push({ label: l.label, cost: l.cost * MARKUP });
+
+    return { lines, retail };
+  }
+
+  function fmt(n)  { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  function fmtR(n) { return '$' + Math.round(n).toLocaleString('en-CA'); }
+
+  function updatePriceDisplay() {
+    const badge    = document.getElementById('priceBadge');
+    const badgeVal = document.getElementById('priceBadgeValue');
+    const p = calcPrice();
+
+    if (!p) { badge.style.display = 'none'; return; }
+    badge.style.display = 'flex';
+    badgeVal.textContent = fmtR(p.retail);
+
+    // Rebuild breakdown rows
+    const rows = document.getElementById('priceBreakdownRows');
+    let html = '';
+
+    const row = (label, val, cls='') =>
+      `<div class="price-breakdown-row ${cls}"><span>${label}</span><span>${val}</span></div>`;
+
+    for (const l of p.lines) html += row(l.label, l.cost > 0 ? fmt(l.cost) : '$0.00');
+
+    html += row('Estimated Price', fmtR(p.retail), 'total');
+
+    rows.innerHTML = html;
+  }
+
+  function togglePriceBreakdown() {
+    document.getElementById('priceBreakdown').classList.toggle('open');
+  }
+
+  document.addEventListener('click', e => {
+    const popup  = document.getElementById('priceBreakdown');
+    const badge  = document.getElementById('priceBadge');
+    if (popup && popup.classList.contains('open') &&
+        !popup.contains(e.target) && !badge.contains(e.target)) {
+      popup.classList.remove('open');
+    }
+  });
+
+  // Contact modal
+  function showContactModal() {
+    // Pre-fill fields if already saved
+    document.getElementById('contactName').value  = state.contact.name;
+    document.getElementById('contactEmail').value = state.contact.email;
+    document.getElementById('contactPhone').value = state.contact.phone;
+    document.getElementById('contactRequest').value = state.contact.request;
+    document.getElementById('contactErrorMsg').classList.remove('visible');
+    document.getElementById('contactEmail').classList.remove('error');
+    document.getElementById('contactPhone').classList.remove('error');
+    document.getElementById('contactModal').style.display = 'flex';
+  }
+
+  function submitContact() {
+    const email = document.getElementById('contactEmail').value.trim();
+    const phone = document.getElementById('contactPhone').value.trim();
+    const errMsg = document.getElementById('contactErrorMsg');
+    const emailEl = document.getElementById('contactEmail');
+    const phoneEl = document.getElementById('contactPhone');
+    emailEl.classList.remove('error');
+    phoneEl.classList.remove('error');
+    if (!email && !phone) {
+      errMsg.classList.add('visible');
+      emailEl.classList.add('error');
+      phoneEl.classList.add('error');
+      return;
+    }
+    errMsg.classList.remove('visible');
+    state.contact.name    = document.getElementById('contactName').value.trim();
+    state.contact.email   = email;
+    state.contact.phone   = phone;
+    state.contact.request = document.getElementById('contactRequest').value.trim();
+    state.contactSaved = true;
+    const quoteMode = document.getElementById('contactModal').dataset.quoteMode === '1';
+    document.getElementById('contactModal').dataset.quoteMode = '';
+    document.getElementById('contactModal').style.display = 'none';
+    if (quoteMode) submitQuote();
+  }
+
+  function skipContact() {
+    state.contactSaved = false;
+    document.getElementById('contactModal').style.display = 'none';
+  }
+
+  // Reset
+  function resetConfig() {
+    Object.assign(state, {
+      step:1, gateType:null, swingType:null, foldType:null, height:null, width:null,
+      frameShape:'rectangle', bracing:null,
+      finish:null, infill:null,
+      infillDirection:null, woodSize:null, woodGap:null,
+      metalProfile:null, metalSize:null, metalGap:null, vinylColor:null,
+      package:false
+    });
+    state.addons.clear();
+    document.querySelectorAll('.option-card,.size-chip,.addon-item,.type-icon-btn').forEach(el => el.classList.remove('selected'));
+    document.getElementById('addonPackage').classList.remove('selected');
+    showStep(1); updatePreview(); updateBreadcrumbs();
+  }
+
+  // Init — default selection: Slide Gate
+  selectGateType(document.querySelector('.type-icon-btn[data-value="slide"]'));
+  showStep(1);
+  // Show contact modal after full DOM is ready (modal HTML lives after this script block)
+  window.addEventListener('DOMContentLoaded', showContactModal);
+</script>
+
+<!-- Contact info modal -->
+<div id="contactModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="contact-modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26">
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <h3>Let's get your quote ready</h3>
+    <p>Share your contact details and we'll send a detailed quote. At least an email or phone number is needed.</p>
+    <div class="contact-fields">
+      <div>
+        <div class="contact-field-label">Name <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+        <input id="contactName" class="contact-input" type="text" placeholder="Your name" autocomplete="name">
+      </div>
+      <div>
+        <div class="contact-field-label">Email</div>
+        <input id="contactEmail" class="contact-input" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="contact-or-divider">or</div>
+      <div>
+        <div class="contact-field-label">Phone / Text</div>
+        <input id="contactPhone" class="contact-input" type="tel" placeholder="+1 (555) 000-0000" autocomplete="tel">
+      </div>
+      <div id="contactErrorMsg" class="contact-error-msg">Please enter an email address or phone number.</div>
+      <div>
+        <div class="contact-field-label">Custom requests <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+        <textarea id="contactRequest" class="contact-input" placeholder="Any special requirements or questions…"></textarea>
+      </div>
+    </div>
+    <button class="modal-btn modal-btn--primary" style="width:100%" onclick="submitContact()">Save &amp; Continue</button>
+    <div class="contact-skip"><button onclick="skipContact()">Skip for now</button></div>
+  </div>
+</div>
+
+<!-- Bracing conflict modal -->
+<div id="bracingConflictModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <h3>Bracing upgrade required</h3>
+    <p id="bracingConflictMsg">Wood and Metal Board infills add significant weight and stress. Cable bracing is not compatible — rigid bracing or a beam is required.</p>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn--secondary" onclick="bracingConflictBack()">&#8592; Change infill</button>
+      <button class="modal-btn modal-btn--primary" onclick="bracingConflictAccept()">Accept — switch to Rigid Diagonal</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
