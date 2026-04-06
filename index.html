@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
+  <style
     :root {
       --accent: #FFB910;
       --accent-hover: #E5A000;
@@ -1773,8 +1773,10 @@
     if (n === 2) { updateSwingTypeVisibility(); updateFoldTypeVisibility(); updateHeightOptions(); buildWidthChips(); }
     if (n === 6) { updateSlideAddonsVisibility(); syncAddonUI(); }
     if (n === 3) { applyFrameDefaults(); updateBracingOptions(); }
-    // Scroll page to top of panel area
+    // Scroll page and panel to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    const panel = document.querySelector('.panel');
+    if (panel) panel.scrollTop = 0;
     updateBreadcrumbs();
   }
 
