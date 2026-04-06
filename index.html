@@ -144,7 +144,8 @@
     .app {
       flex: 1;
       display: flex;
-      min-height: 600px;
+      height: calc(100vh - var(--nav-height) - var(--breadcrumb-height));
+      overflow: hidden;
     }
 
     /* ── Left: Preview ── */
@@ -154,9 +155,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      position: sticky;
-      top: calc(var(--nav-height) + var(--breadcrumb-height));
-      height: calc(100vh - var(--nav-height) - var(--breadcrumb-height));
+      height: 100%;
       min-width: 0;
     }
     .preview-inner {
@@ -216,6 +215,8 @@
       border-left: 1px solid rgba(0,0,0,0.06);
       background: var(--white);
       padding-bottom: 80px;
+      height: 100%;
+      overflow-y: auto;
     }
 
     /* Step progress */
@@ -224,7 +225,7 @@
       gap: 6px;
       padding: 20px 28px 0;
       position: sticky;
-      top: calc(var(--nav-height) + var(--breadcrumb-height));
+      top: 0;
       background: var(--white);
       z-index: 5;
       padding-bottom: 12px;
@@ -672,10 +673,8 @@
 
     /* ── Step footer (fixed bottom) ── */
     .step-footer {
-      position: fixed;
+      position: sticky;
       bottom: 0;
-      left: 0;
-      right: 0;
       z-index: 80;
       padding: 14px 32px;
       border-top: 1px solid rgba(0,0,0,0.08);
@@ -789,7 +788,7 @@
     }
 
     @media (max-width: 860px) {
-      .app { flex-direction: column; }
+      .app { flex-direction: column; height: auto; overflow: visible; }
       .preview {
         position: relative;
         top: 0;
@@ -800,6 +799,14 @@
         width: 100%;
         border-left: none; border-top: 1px solid rgba(0,0,0,0.06);
         padding-bottom: 80px;
+        position: static;
+        height: auto;
+        overflow-y: visible;
+      }
+      .step-footer {
+        position: fixed;
+        left: 0;
+        right: 0;
       }
       .step-progress {
         top: calc(var(--nav-height) + var(--breadcrumb-height));
